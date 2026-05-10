@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umair AI 2.0 | Futuristic Intelligence</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .glass {
+            background: rgba(15, 15, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.8), 0 0 20px rgba(147, 51, 234, 0.5);
+        }
+
+        .bg-gradient-main {
+            background: radial-gradient(circle at top right, rgba(88, 28, 135, 0.15), transparent),
+                        radial-gradient(circle at bottom left, rgba(30, 58, 138, 0.15), transparent);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(59, 130, 246, 0.3); }
+            50% { border-color: rgba(147, 51, 234, 0.6); }
+            100% { border-color: rgba(59, 130, 246, 0.3); }
+        }
+
+        .active-input {
+            animation: pulse-border 2s infinite;
+        }
+
+        code {
+            background: #1a1a1a;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence } = FramerMotion;
+
+        const App = () => {
+            const [messages, setMessages] = useState([
+                { role: 'assistant', content: 'Welcome, I am **Umair AI 2.0**. How can I assist your operations today?' }
+            ]);
+            const [input, setInput] = useState('');
+            const [isSidebarOpen, setSidebarOpen] = useState(true);
+            const [isSettingsOpen, setSettingsOpen] = useState(false);
+            const [isAuthModal, setAuthModal] = useState(false);
+            const [password, setPassword] = useState('');
+            const [loading, setLoading] = useState(false);
+            
+            // Settings State
+            const [apiKey, setApiKey] = useState(localStorage.getItem('umair_api_key') || '');
+            const [modelName, setModelName] = useState(localStorage.getItem('umair_model_name') || '');
+            
+            // Image State
+            const [selectedImage, setSelectedImage] = useState(null);
+            const [imagePreview, setImagePreview] = useState(null);
+            
+            const chatEndRef = useRef(null);
+
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, [messages, loading]);
+
+            const handleImageChange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setImagePreview(reader.result);
+                        setSelectedImage(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleSaveSettings = () => {
+                localStorage.setItem('umair_api_key', apiKey);
+                localStorage.setItem('umair_model_name', modelName);
+                setSettingsOpen(false);
+                alert("Protocol Updated: Settings Saved Successfully.");
+            };
+
+            const checkPassword = (e) => {
+                e.preventDefault();
+                if (password === '121845') {
+                    setAuthModal(false);
+                    setSettingsOpen(true);
+                    setPassword('');
+                } else {
+                    alert("Access Denied: Invalid Security Key.");
+                    setPassword('');
+                }
+            };
+
+            const sendMessage = async (e) => {
+                e.preventDefault();
+                if (!input.trim() && !selectedImage) return;
+                if (!apiKey || !modelName) {
+                    alert("System Offline: Please configure API Key and Model in Settings.");
+                    return;
+                }
+
+                const userMsg = { role: 'user', content: input, image: imagePreview };
+                setMessages(prev => [...prev, userMsg]);
+                setInput('');
+                setImagePreview(null);
+                setLoading(true);
+
+                try {
+                    const payload = {
+                        model: modelName,
+                        messages: [
+                            ...messages.map(m => ({ role: m.role, content: m.content })),
+                            {
+                                role: "user",
+                                content: selectedImage 
+                                    ? [
+                                        { type: "text", text: input },
+                                        { type: "image_url", image_url: { url: selectedImage } }
+                                      ]
+                                    : input
+                            }
+                        ]
+                    };
+
+                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${apiKey}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+                    const aiResponse = data.choices[0].message.content;
+                    
+                    setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+                } catch (error) {
+                    setMessages(prev => [...prev, { role: 'assistant', content: "**Error:** Failed to connect to neural network. Check API Key." }]);
+                } finally {
+                    setLoading(false);
+                    setSelectedImage(null);
+                }
+            };
+
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text);
+                alert("Copied to clipboard");
+            };
+
+            return (
+                <div className="flex h-screen w-full bg-gradient-main overflow-hidden text-gray-200">
+                    
+                    {/* Sidebar */}
+                    <AnimatePresence>
+                        {isSidebarOpen && (
+                            <motion.div 
+                                initial={{ x: -300 }}
+                                animate={{ x: 0 }}
+                                exit={{ x: -300 }}
+                                className="w-72 glass h-full flex flex-col p-4 z-20"
+                            >
+                                <div className="flex items-center gap-3 mb-10 px-2">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                        <i className="fas fa-microchip text-white text-xl"></i>
+                                    </div>
+                                    <h1 className="orbitron font-bold text-lg tracking-wider neon-glow">UMAIR AI 2.0</h1>
+                                </div>
+
+                                <button 
+                                    onClick={() => setMessages([{ role: 'assistant', content: 'New session initialized. How can I help?' }])}
+                                    className="w-full py-3 mb-6 border border-blue-500/30 rounded-xl hover:bg-blue-500/10 transition-all flex items-center justify-center gap-2 font-medium"
+                                >
+                                    <i className="fas fa-plus text-sm"></i> New Chat
+                                </button>
+
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Neural Logs</p>
+                                    <div className="space-y-2">
+                                        <div className="p-3 bg-white/5 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10">
+                                            <p className="text-sm truncate">Current Session Activity</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Main Chat Area */}
+                    <div className="flex-1 flex flex-col relative min-w-0">
+                        
+                        {/* Header */}
+                        <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 glass z-10">
+                            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white">
+                                <i className={`fas ${isSidebarOpen ? 'fa-indent' : 'fa-outdent'} text-xl`}></i>
+                            </button>
+                            <div className="flex items-center gap-4">
+                                <button onClick={() => setAuthModal(true)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                                    <i className="fas fa-cog text-gray-400"></i>
+                                </button>
+                            </div>
+                        </header>
+
+                        {/* Messages */}
+                        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar pb-32">
+                            {messages.map((msg, idx) => (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    key={idx} 
+                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                >
+                                    <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl p-4 relative group ${
+                                        msg.role === 'user' 
+                                        ? 'bg-blue-600/20 border border-blue-500/30 ml-4' 
+                                        : 'glass mr-4'
+                                    }`}>
+                                        {msg.image && (
+                                            <img src={msg.image} className="max-w-xs rounded-lg mb-3 border border-white/10" alt="uploaded" />
+                                        )}
+                                        <div 
+                                            className="prose prose-invert text-sm md:text-base leading-relaxed"
+                                            dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}
+                                        />
+                                        <button 
+                                            onClick={() => copyToClipboard(msg.content)}
+                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-white p-1"
+                                        >
+                                            <i className="fas fa-copy text-xs"></i>
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                            {loading && (
+                                <div className="flex justify-start">
+                                    <div className="glass rounded-2xl p-4 flex gap-2">
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></span>
+                                        <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={chatEndRef} />
+                        </main>
+
+                        {/* Input Area */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-gradient-to-t from-black via-black/80 to-transparent">
+                            <div className="max-w-4xl mx-auto">
+                                {imagePreview && (
+                                    <div className="relative inline-block mb-4">
+                                        <img src={imagePreview} className="h-20 w-20 object-cover rounded-xl border-2 border-blue-500" />
+                                        <button 
+                                            onClick={() => setImagePreview(null)}
+                                            className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={sendMessage} className="relative group">
+                                    <div className="absolute inset-y-0 left-4 flex items-center gap-3">
+                                        <label className="cursor-pointer text-gray-400 hover:text-blue-400 transition-colors">
+                                            <i className="fas fa-paperclip text-xl"></i>
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                                        </label>
+                                    </div>
+                                    <input 
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder="Command Umair AI 2.0..."
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-14 focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all active-input"
+                                    />
+                                    <button 
+                                        type="submit"
+                                        className="absolute inset-y-2 right-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl text-white hover:scale-105 transition-transform"
+                                    >
+                                        <i className="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                                <p className="text-center text-[10px] text-gray-500 mt-3 uppercase tracking-widest">Powered by Umair AI Quantum Core</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Auth Modal */}
+                    <AnimatePresence>
+                        {isAuthModal && (
+                            <motion.div 
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                            >
+                                <motion.div 
+                                    initial={{ scale: 0.9 }} animate={{ scale: 1 }}
+                                    className="glass p-8 rounded-3xl w-full max-w-md border border-white/20 shadow-2xl"
+                                >
+                                    <h2 className="orbitron text-xl font-bold mb-6 text-center text-white">Security Clearance Required</h2>
+                                    <form onSubmit={checkPassword}>
+                                        <input 
+                                            type="password" 
+                                            placeholder="Enter Access Key" 
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 mb-4 focus:outline-none focus:border-purple-500"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <div className="flex gap-3">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setAuthModal(false)}
+                                                className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                            >Cancel</button>
+                                            <button 
+                                                type="submit"
+                                                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-bold"
+                                            >Authorize</button>
+                                        </div>
+                                    </form>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Settings Panel */}
+                    <AnimatePresence>
+                        {isSettingsOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                            >
+                                <motion.div 
+                                    initial={{ y: 50 }} animate={{ y: 0 }}
+                                    className="glass p-8 rounded-3xl w-full max-w-lg border border-white/20"
+                                >
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h2 className="orbitron text-2xl font-bold text-white neon-glow">Core Settings</h2>
+                                        <button onClick={() => setSettingsOpen(false)} className="text-gray-400 hover:text-white">
+                                            <i className="fas fa-times text-xl"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">OpenRouter API Key</label>
+                                            <input 
+                                                type="password" 
+                                                placeholder="Paste your API key" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-blue-500 transition-all"
+                                                value={apiKey}
+                                                onChange={(e) => setApiKey(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">AI Model Name</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="e.g. google/gemini-pro-1.5-exp" 
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-blue-500 transition-all"
+                                                value={modelName}
+                                                onChange={(e) => setModelName(e.target.value)}
+                                            />
+                                        </div>
+                                        <button 
+                                            onClick={handleSaveSettings}
+                                            className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                        >
+                                            SAVE CONFIGURATION
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Particle Background Effect */}
+                    <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
+                        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] animate-pulse"></div>
+                        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

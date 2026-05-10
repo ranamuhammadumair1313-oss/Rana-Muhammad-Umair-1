@@ -1,425 +1,665 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umair AI 2.0 | Futuristic Intelligence</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap');
-        
-        body {
-            background-color: #050505;
-            color: #e5e7eb;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-        }
-
-        .orbitron { font-family: 'Orbitron', sans-serif; }
-
-        .glass {
-            background: rgba(15, 15, 20, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .neon-glow {
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.8), 0 0 20px rgba(147, 51, 234, 0.5);
-        }
-
-        .bg-gradient-main {
-            background: radial-gradient(circle at top right, rgba(88, 28, 135, 0.15), transparent),
-                        radial-gradient(circle at bottom left, rgba(30, 58, 138, 0.15), transparent);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        @keyframes pulse-border {
-            0% { border-color: rgba(59, 130, 246, 0.3); }
-            50% { border-color: rgba(147, 51, 234, 0.6); }
-            100% { border-color: rgba(59, 130, 246, 0.3); }
-        }
-
-        .active-input {
-            animation: pulse-border 2s infinite;
-        }
-
-        code {
-            background: #1a1a1a;
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Umair AI 2.0 | Premium Vision Chat</title>
+  <!-- Font Awesome 6 for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Tailwind via CDN + custom layer -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0a0a0f;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    /* animated background particles effect */
+    .bg-glow-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.1) 0%, transparent 45%),
+                  radial-gradient(circle at 40% 80%, #0f172a 0%, #030712 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(139, 92, 246, 0.2);
+    }
+    .neon-glow-text {
+      text-shadow: 0 0 12px #38bdf8, 0 0 30px #7c3aed;
+      letter-spacing: 0.5px;
+    }
+    .message-bubble {
+      transition: all 0.25s ease;
+    }
+    .code-block {
+      background: #0f0f1a;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 8px 0;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      border-left: 3px solid #38bdf8;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+    }
+    .upload-preview-thumb {
+      transition: 0.2s ease;
+      border: 2px solid rgba(56,189,248,0.5);
+      border-radius: 16px;
+    }
+    .sidebar {
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 50;
+        height: 100%;
+        width: 280px;
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .mobile-overlay {
+        display: none;
+      }
+      .sidebar.open + .mobile-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 40;
+      }
+    }
+    .animate-thinking {
+      animation: pulse-glow 1.4s infinite;
+    }
+    @keyframes pulse-glow {
+      0% { opacity: 0.6; text-shadow: 0 0 5px #a855f7; }
+      50% { opacity: 1; text-shadow: 0 0 18px #38bdf8, 0 0 30px #7c3aed; }
+      100% { opacity: 0.6; text-shadow: 0 0 5px #a855f7; }
+    }
+    .error-shake {
+      animation: shake 0.5s ease-in-out;
+    }
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      20%{ transform: translateX(-8px); }
+      40%{ transform: translateX(8px); }
+      60%{ transform: translateX(-5px); }
+      80%{ transform: translateX(5px); }
+    }
+    .toast-slide {
+      animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="relative text-white overflow-hidden">
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-        const { motion, AnimatePresence } = FramerMotion;
+  <!-- Background particles effect -->
+  <div class="bg-glow-particles"></div>
 
-        const App = () => {
-            const [messages, setMessages] = useState([
-                { role: 'assistant', content: 'Welcome, I am **Umair AI 2.0**. How can I assist your operations today?' }
-            ]);
-            const [input, setInput] = useState('');
-            const [isSidebarOpen, setSidebarOpen] = useState(true);
-            const [isSettingsOpen, setSettingsOpen] = useState(false);
-            const [isAuthModal, setAuthModal] = useState(false);
-            const [password, setPassword] = useState('');
-            const [loading, setLoading] = useState(false);
-            
-            // Settings State
-            const [apiKey, setApiKey] = useState(localStorage.getItem('umair_api_key') || '');
-            const [modelName, setModelName] = useState(localStorage.getItem('umair_model_name') || '');
-            
-            // Image State
-            const [selectedImage, setSelectedImage] = useState(null);
-            const [imagePreview, setImagePreview] = useState(null);
-            
-            const chatEndRef = useRef(null);
+  <!-- Toast container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3"></div>
 
-            useEffect(() => {
-                chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-            }, [messages, loading]);
+  <!-- Mobile overlay for sidebar -->
+  <div id="mobileOverlay" class="mobile-overlay hidden md:hidden" onclick="toggleSidebar()"></div>
 
-            const handleImageChange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setImagePreview(reader.result);
-                        setSelectedImage(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
+  <div class="relative z-10 flex h-screen w-full overflow-hidden">
+    
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar" class="sidebar glass-panel flex flex-col w-72 md:w-80 h-full p-5 rounded-r-3xl border-l-0 border-t-0 border-b-0 border-r border-white/10">
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <i class="fas fa-robot text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold neon-glow-text tracking-wide">Umair AI 2.0</span>
+        </div>
+        <button onclick="toggleSidebar()" class="md:hidden text-gray-300 hover:text-white text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-            const handleSaveSettings = () => {
-                localStorage.setItem('umair_api_key', apiKey);
-                localStorage.setItem('umair_model_name', modelName);
-                setSettingsOpen(false);
-                alert("Protocol Updated: Settings Saved Successfully.");
-            };
+      <button onclick="newChat()" class="w-full mb-6 py-3 px-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 rounded-xl flex items-center gap-3 hover:shadow-lg hover:shadow-cyan-500/20 transition-all text-white font-medium">
+        <i class="fas fa-plus-circle text-cyan-300"></i> New Chat
+      </button>
 
-            const checkPassword = (e) => {
-                e.preventDefault();
-                if (password === '121845') {
-                    setAuthModal(false);
-                    setSettingsOpen(true);
-                    setPassword('');
-                } else {
-                    alert("Access Denied: Invalid Security Key.");
-                    setPassword('');
-                }
-            };
+      <div class="text-sm text-gray-400 mb-2 font-semibold tracking-wider">HISTORY</div>
+      <div id="chatHistoryList" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scroll">
+        <!-- dynamic chat history items -->
+      </div>
 
-            const sendMessage = async (e) => {
-                e.preventDefault();
-                if (!input.trim() && !selectedImage) return;
-                if (!apiKey || !modelName) {
-                    alert("System Offline: Please configure API Key and Model in Settings.");
-                    return;
-                }
+      <div class="mt-auto pt-4 border-t border-white/10 text-xs text-gray-500 flex justify-between items-center">
+        <span>© Umair AI 2.0</span>
+        <button id="settingsIconBtn" class="text-gray-300 hover:text-cyan-300 transition p-2 rounded-full hover:bg-white/5" title="Settings">
+          <i class="fas fa-cog text-lg"></i>
+        </button>
+      </div>
+    </aside>
 
-                const userMsg = { role: 'user', content: input, image: imagePreview };
-                setMessages(prev => [...prev, userMsg]);
-                setInput('');
-                setImagePreview(null);
-                setLoading(true);
+    <!-- ===== MAIN CHAT AREA ===== -->
+    <main class="flex-1 flex flex-col relative h-full w-full">
+      <!-- Top bar mobile -->
+      <div class="md:hidden flex items-center justify-between p-4 glass-panel rounded-b-2xl">
+        <button onclick="toggleSidebar()" class="text-white text-2xl"><i class="fas fa-bars"></i></button>
+        <span class="text-xl font-bold neon-glow-text">Umair AI 2.0</span>
+        <div class="w-8"></div>
+      </div>
 
-                try {
-                    const payload = {
-                        model: modelName,
-                        messages: [
-                            ...messages.map(m => ({ role: m.role, content: m.content })),
-                            {
-                                role: "user",
-                                content: selectedImage 
-                                    ? [
-                                        { type: "text", text: input },
-                                        { type: "image_url", image_url: { url: selectedImage } }
-                                      ]
-                                    : input
-                            }
-                        ]
-                    };
+      <!-- Messages container -->
+      <div id="chatMessages" class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-5 scroll-smooth custom-scroll">
+        <!-- Welcome / default message -->
+        <div class="flex flex-col items-center justify-center h-full text-center opacity-80" id="welcomeMessage">
+          <div class="text-6xl mb-4 neon-glow-text"><i class="fas fa-brain"></i></div>
+          <h2 class="text-2xl font-bold bg-gradient-to-r from-cyan-300 to-purple-400 bg-clip-text text-transparent">Umair AI 2.0</h2>
+          <p class="text-gray-400 max-w-md mt-2">Upload images or start a conversation. Vision-ready AI.</p>
+        </div>
+      </div>
 
-                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${apiKey}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(payload)
-                    });
+      <!-- Image preview strip -->
+      <div id="imagePreviewContainer" class="px-4 md:px-8 pb-2 flex gap-3 flex-wrap hidden"></div>
 
-                    const data = await response.json();
-                    const aiResponse = data.choices[0].message.content;
-                    
-                    setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
-                } catch (error) {
-                    setMessages(prev => [...prev, { role: 'assistant', content: "**Error:** Failed to connect to neural network. Check API Key." }]);
-                } finally {
-                    setLoading(false);
-                    setSelectedImage(null);
-                }
-            };
+      <!-- Input area -->
+      <div class="p-3 md:p-5 glass-panel rounded-t-3xl mx-2 md:mx-4 mb-2 md:mb-4 border border-cyan-400/20">
+        <div class="flex items-end gap-2 md:gap-3">
+          <label for="imageUpload" class="cursor-pointer p-3 rounded-xl bg-white/5 hover:bg-cyan-500/20 transition border border-white/10 text-cyan-300 text-xl">
+            <i class="fas fa-image"></i>
+            <input type="file" id="imageUpload" accept="image/jpeg,image/png,image/webp" class="hidden" onchange="handleImageSelect(event)" />
+          </label>
+          
+          <div class="flex-1 relative">
+            <textarea id="userInput" rows="1" placeholder="Message Umair AI..." 
+              class="w-full bg-transparent border border-white/20 rounded-2xl py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 resize-none"
+              onkeydown="handleKeyDown(event)"
+              style="min-height: 48px; max-height: 120px;"></textarea>
+          </div>
 
-            const copyToClipboard = (text) => {
-                navigator.clipboard.writeText(text);
-                alert("Copied to clipboard");
-            };
+          <button onclick="sendMessage()" id="sendBtn" class="p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:shadow-lg hover:shadow-purple-500/40 transition text-white text-xl flex items-center justify-center">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="text-xs text-gray-500 mt-2 flex justify-between">
+          <span><i class="fas fa-arrow-up mr-1"></i>Enter to send</span>
+          <span class="flex items-center gap-2">
+            <span id="dragHint" class="hidden md:inline">Drop image anywhere</span>
+            <i class="fas fa-cloud-upload-alt text-cyan-400/70"></i>
+          </span>
+        </div>
+      </div>
+    </main>
+  </div>
 
-            return (
-                <div className="flex h-screen w-full bg-gradient-main overflow-hidden text-gray-200">
-                    
-                    {/* Sidebar */}
-                    <AnimatePresence>
-                        {isSidebarOpen && (
-                            <motion.div 
-                                initial={{ x: -300 }}
-                                animate={{ x: 0 }}
-                                exit={{ x: -300 }}
-                                className="w-72 glass h-full flex flex-col p-4 z-20"
-                            >
-                                <div className="flex items-center gap-3 mb-10 px-2">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                        <i className="fas fa-microchip text-white text-xl"></i>
-                                    </div>
-                                    <h1 className="orbitron font-bold text-lg tracking-wider neon-glow">UMAIR AI 2.0</h1>
-                                </div>
+  <!-- ===== PASSWORD MODAL ===== -->
+  <div id="passwordModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm hidden">
+    <div class="glass-panel p-6 rounded-2xl w-80 text-center animate-fade-in">
+      <h3 class="text-xl font-bold text-cyan-300 mb-4">Settings Access</h3>
+      <input type="password" id="passwordInput" placeholder="Enter password" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white mb-4 focus:outline-none focus:border-purple-400">
+      <div class="flex gap-3 justify-center">
+        <button onclick="closePasswordModal()" class="px-5 py-2 bg-gray-700 rounded-xl">Cancel</button>
+        <button onclick="verifyPassword()" class="px-5 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-medium">Unlock</button>
+      </div>
+      <p id="passwordError" class="text-red-400 text-sm mt-2 hidden error-shake">Wrong password</p>
+    </div>
+  </div>
 
-                                <button 
-                                    onClick={() => setMessages([{ role: 'assistant', content: 'New session initialized. How can I help?' }])}
-                                    className="w-full py-3 mb-6 border border-blue-500/30 rounded-xl hover:bg-blue-500/10 transition-all flex items-center justify-center gap-2 font-medium"
-                                >
-                                    <i className="fas fa-plus text-sm"></i> New Chat
-                                </button>
+  <!-- ===== SETTINGS PANEL MODAL ===== -->
+  <div id="settingsPanel" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+    <div class="glass-panel p-6 rounded-2xl w-[90%] max-w-md text-left">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-2xl font-bold neon-glow-text">Settings</h2>
+        <button onclick="closeSettingsPanel()" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">API Key</label>
+          <input type="password" id="apiKeyInput" placeholder="Paste your API key" class="w-full bg-black/40 border border-white/20 rounded-xl p-3 text-white focus:border-cyan-400 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">Model Name</label>
+          <input type="text" id="modelNameInput" placeholder="Enter model name" class="w-full bg-black/40 border border-white/20 rounded-xl p-3 text-white focus:border-cyan-400 outline-none">
+        </div>
+        <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-bold hover:shadow-lg transition">Save Configuration</button>
+        <p class="text-xs text-gray-500 text-center">Stored locally in your browser.</p>
+      </div>
+    </div>
+  </div>
 
-                                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Neural Logs</p>
-                                    <div className="space-y-2">
-                                        <div className="p-3 bg-white/5 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10">
-                                            <p className="text-sm truncate">Current Session Activity</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+  <script>
+    (function() {
+      // ----- STATE -----
+      const PASSWORD = "121845";
+      let currentChat = []; // messages: {role, content, image?}
+      let selectedImageFile = null;
+      let imagePreviewUrl = null;
+      let isWaitingForResponse = false;
+      
+      // Chat history (sidebar)
+      let chatSessions = []; // {id, title, messages}
+      let activeSessionId = null;
 
-                    {/* Main Chat Area */}
-                    <div className="flex-1 flex flex-col relative min-w-0">
-                        
-                        {/* Header */}
-                        <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 glass z-10">
-                            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white">
-                                <i className={`fas ${isSidebarOpen ? 'fa-indent' : 'fa-outdent'} text-xl`}></i>
-                            </button>
-                            <div className="flex items-center gap-4">
-                                <button onClick={() => setAuthModal(true)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
-                                    <i className="fas fa-cog text-gray-400"></i>
-                                </button>
-                            </div>
-                        </header>
+      // DOM elements
+      const chatMessages = document.getElementById('chatMessages');
+      const userInput = document.getElementById('userInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const imageUpload = document.getElementById('imageUpload');
+      const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const settingsIconBtn = document.getElementById('settingsIconBtn');
+      const passwordModal = document.getElementById('passwordModal');
+      const settingsPanel = document.getElementById('settingsPanel');
+      const apiKeyInput = document.getElementById('apiKeyInput');
+      const modelNameInput = document.getElementById('modelNameInput');
+      const chatHistoryList = document.getElementById('chatHistoryList');
+      const toastContainer = document.getElementById('toast-container');
 
-                        {/* Messages */}
-                        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 custom-scrollbar pb-32">
-                            {messages.map((msg, idx) => (
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    key={idx} 
-                                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                >
-                                    <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl p-4 relative group ${
-                                        msg.role === 'user' 
-                                        ? 'bg-blue-600/20 border border-blue-500/30 ml-4' 
-                                        : 'glass mr-4'
-                                    }`}>
-                                        {msg.image && (
-                                            <img src={msg.image} className="max-w-xs rounded-lg mb-3 border border-white/10" alt="uploaded" />
-                                        )}
-                                        <div 
-                                            className="prose prose-invert text-sm md:text-base leading-relaxed"
-                                            dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}
-                                        />
-                                        <button 
-                                            onClick={() => copyToClipboard(msg.content)}
-                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-white p-1"
-                                        >
-                                            <i className="fas fa-copy text-xs"></i>
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            ))}
-                            {loading && (
-                                <div className="flex justify-start">
-                                    <div className="glass rounded-2xl p-4 flex gap-2">
-                                        <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></span>
-                                        <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                                        <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={chatEndRef} />
-                        </main>
+      // ----- INITIAL LOAD -----
+      document.addEventListener('DOMContentLoaded', () => {
+        loadFromStorage();
+        renderChatHistorySidebar();
+        // If no active session, create default empty
+        if (!activeSessionId || !chatSessions.find(s => s.id === activeSessionId)) {
+          createNewSession();
+        } else {
+          loadSession(activeSessionId);
+        }
+        // Drag & drop
+        setupDragDrop();
+      });
 
-                        {/* Input Area */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-gradient-to-t from-black via-black/80 to-transparent">
-                            <div className="max-w-4xl mx-auto">
-                                {imagePreview && (
-                                    <div className="relative inline-block mb-4">
-                                        <img src={imagePreview} className="h-20 w-20 object-cover rounded-xl border-2 border-blue-500" />
-                                        <button 
-                                            onClick={() => setImagePreview(null)}
-                                            className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                                        >
-                                            <i className="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                )}
-                                
-                                <form onSubmit={sendMessage} className="relative group">
-                                    <div className="absolute inset-y-0 left-4 flex items-center gap-3">
-                                        <label className="cursor-pointer text-gray-400 hover:text-blue-400 transition-colors">
-                                            <i className="fas fa-paperclip text-xl"></i>
-                                            <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                                        </label>
-                                    </div>
-                                    <input 
-                                        type="text"
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        placeholder="Command Umair AI 2.0..."
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-14 focus:outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all active-input"
-                                    />
-                                    <button 
-                                        type="submit"
-                                        className="absolute inset-y-2 right-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl text-white hover:scale-105 transition-transform"
-                                    >
-                                        <i className="fas fa-paper-plane"></i>
-                                    </button>
-                                </form>
-                                <p className="text-center text-[10px] text-gray-500 mt-3 uppercase tracking-widest">Powered by Umair AI Quantum Core</p>
-                            </div>
-                        </div>
-                    </div>
+      function loadFromStorage() {
+        try {
+          const storedSessions = localStorage.getItem('umair_ai_sessions');
+          if (storedSessions) chatSessions = JSON.parse(storedSessions);
+          const storedActive = localStorage.getItem('umair_active_session');
+          if (storedActive) activeSessionId = storedActive;
+          
+          const savedKey = localStorage.getItem('umair_api_key');
+          const savedModel = localStorage.getItem('umair_model');
+          if (savedKey) apiKeyInput.value = savedKey;
+          if (savedModel) modelNameInput.value = savedModel;
+        } catch(e) {}
+      }
 
-                    {/* Auth Modal */}
-                    <AnimatePresence>
-                        {isAuthModal && (
-                            <motion.div 
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-                            >
-                                <motion.div 
-                                    initial={{ scale: 0.9 }} animate={{ scale: 1 }}
-                                    className="glass p-8 rounded-3xl w-full max-w-md border border-white/20 shadow-2xl"
-                                >
-                                    <h2 className="orbitron text-xl font-bold mb-6 text-center text-white">Security Clearance Required</h2>
-                                    <form onSubmit={checkPassword}>
-                                        <input 
-                                            type="password" 
-                                            placeholder="Enter Access Key" 
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 mb-4 focus:outline-none focus:border-purple-500"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <div className="flex gap-3">
-                                            <button 
-                                                type="button"
-                                                onClick={() => setAuthModal(false)}
-                                                className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                                            >Cancel</button>
-                                            <button 
-                                                type="submit"
-                                                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-bold"
-                                            >Authorize</button>
-                                        </div>
-                                    </form>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+      function saveSessionsToStorage() {
+        localStorage.setItem('umair_ai_sessions', JSON.stringify(chatSessions));
+        if (activeSessionId) localStorage.setItem('umair_active_session', activeSessionId);
+      }
 
-                    {/* Settings Panel */}
-                    <AnimatePresence>
-                        {isSettingsOpen && (
-                            <motion.div 
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-                            >
-                                <motion.div 
-                                    initial={{ y: 50 }} animate={{ y: 0 }}
-                                    className="glass p-8 rounded-3xl w-full max-w-lg border border-white/20"
-                                >
-                                    <div className="flex justify-between items-center mb-8">
-                                        <h2 className="orbitron text-2xl font-bold text-white neon-glow">Core Settings</h2>
-                                        <button onClick={() => setSettingsOpen(false)} className="text-gray-400 hover:text-white">
-                                            <i className="fas fa-times text-xl"></i>
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="space-y-6">
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">OpenRouter API Key</label>
-                                            <input 
-                                                type="password" 
-                                                placeholder="Paste your API key" 
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-blue-500 transition-all"
-                                                value={apiKey}
-                                                onChange={(e) => setApiKey(e.target.value)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 tracking-widest">AI Model Name</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="e.g. google/gemini-pro-1.5-exp" 
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-blue-500 transition-all"
-                                                value={modelName}
-                                                onChange={(e) => setModelName(e.target.value)}
-                                            />
-                                        </div>
-                                        <button 
-                                            onClick={handleSaveSettings}
-                                            className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 font-bold text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
-                                        >
-                                            SAVE CONFIGURATION
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+      function createNewSession() {
+        const id = Date.now().toString();
+        const newSession = { id, title: 'New Chat', messages: [] };
+        chatSessions.unshift(newSession);
+        activeSessionId = id;
+        saveSessionsToStorage();
+        currentChat = [];
+        selectedImageFile = null;
+        clearImagePreview();
+        renderMessages();
+        renderChatHistorySidebar();
+      }
 
-                    {/* Particle Background Effect */}
-                    <div className="fixed inset-0 pointer-events-none z-0 opacity-30">
-                        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] animate-pulse"></div>
-                        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    </div>
-                </div>
-            );
+      function loadSession(sessionId) {
+        const session = chatSessions.find(s => s.id === sessionId);
+        if (session) {
+          activeSessionId = sessionId;
+          currentChat = session.messages ? [...session.messages] : [];
+          renderMessages();
+          clearImagePreview();
+          saveSessionsToStorage();
+        }
+      }
+
+      function updateSessionMessages() {
+        const session = chatSessions.find(s => s.id === activeSessionId);
+        if (session) {
+          session.messages = [...currentChat];
+          if (currentChat.length > 0 && session.title === 'New Chat') {
+            const firstUser = currentChat.find(m => m.role === 'user');
+            if (firstUser) session.title = firstUser.content.substring(0, 30) + (firstUser.content.length>30?'...':'');
+          }
+          saveSessionsToStorage();
+          renderChatHistorySidebar();
+        }
+      }
+
+      // ----- UI RENDER -----
+      function renderMessages() {
+        if (!chatMessages) return;
+        chatMessages.innerHTML = '';
+        if (currentChat.length === 0) {
+          welcomeMessage?.classList.remove('hidden');
+        } else {
+          welcomeMessage?.classList.add('hidden');
+        }
+
+        currentChat.forEach((msg, index) => {
+          const isUser = msg.role === 'user';
+          const bubble = document.createElement('div');
+          bubble.className = `flex ${isUser ? 'justify-end' : 'justify-start'} message-bubble`;
+          
+          let contentHtml = '';
+          if (msg.image) {
+            contentHtml += `<img src="${msg.image}" class="max-w-xs rounded-xl mb-2 border border-cyan-400/30" alt="uploaded"/>`;
+          }
+          if (msg.content) {
+            contentHtml += isUser ? escapeHtml(msg.content) : renderMarkdown(msg.content);
+          }
+          
+          bubble.innerHTML = `
+            <div class="max-w-[85%] md:max-w-md px-5 py-3 rounded-2xl ${
+              isUser 
+                ? 'bg-gradient-to-br from-cyan-600/70 to-purple-700/60 border border-cyan-300/30 text-white' 
+                : 'bg-gray-800/70 border border-white/10 text-gray-100'
+            } shadow-xl">
+              ${contentHtml}
+              ${!isUser ? `<button onclick="copyMessage('${escapeAttr(msg.content)}')" class="text-xs text-gray-400 hover:text-cyan-300 mt-2 flex items-center gap-1"><i class="far fa-copy"></i> Copy</button>` : ''}
+            </div>
+          `;
+          chatMessages.appendChild(bubble);
+        });
+        scrollToBottom();
+      }
+
+      function renderChatHistorySidebar() {
+        if (!chatHistoryList) return;
+        chatHistoryList.innerHTML = chatSessions.map(s => `
+          <div onclick="switchSession('${s.id}')" class="p-3 rounded-xl cursor-pointer flex justify-between items-center ${s.id === activeSessionId ? 'bg-cyan-500/20 border border-cyan-400/30' : 'hover:bg-white/5 border border-transparent'} transition">
+            <span class="truncate text-sm">${escapeHtml(s.title)}</span>
+            <button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="text-gray-500 hover:text-red-400 text-xs"><i class="fas fa-trash"></i></button>
+          </div>
+        `).join('');
+      }
+
+      function scrollToBottom() {
+        if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function clearImagePreview() {
+        selectedImageFile = null;
+        imagePreviewUrl = null;
+        if (imagePreviewContainer) {
+          imagePreviewContainer.innerHTML = '';
+          imagePreviewContainer.classList.add('hidden');
+        }
+      }
+
+      function renderImagePreview(file) {
+        if (!imagePreviewContainer) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreviewUrl = e.target.result;
+          imagePreviewContainer.innerHTML = `
+            <div class="relative inline-block">
+              <img src="${imagePreviewUrl}" class="h-20 w-20 object-cover rounded-xl upload-preview-thumb" />
+              <button onclick="clearImagePreview()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"><i class="fas fa-times"></i></button>
+            </div>`;
+          imagePreviewContainer.classList.remove('hidden');
         };
+        reader.readAsDataURL(file);
+      }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+      // ----- ACTIONS -----
+      window.newChat = () => createNewSession();
+      window.switchSession = (id) => { if (id !== activeSessionId) loadSession(id); };
+      window.deleteSession = (id) => {
+        chatSessions = chatSessions.filter(s => s.id !== id);
+        if (activeSessionId === id) {
+          if (chatSessions.length > 0) {
+            activeSessionId = chatSessions[0].id;
+            loadSession(activeSessionId);
+          } else {
+            createNewSession();
+          }
+        }
+        saveSessionsToStorage();
+        renderChatHistorySidebar();
+      };
+
+      window.handleImageSelect = (event) => {
+        const file = event.target.files[0];
+        if (file && ['image/jpeg','image/png','image/webp'].includes(file.type)) {
+          selectedImageFile = file;
+          renderImagePreview(file);
+        }
+        event.target.value = '';
+      };
+
+      function setupDragDrop() {
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files[0];
+          if (file && file.type.startsWith('image/')) {
+            selectedImageFile = file;
+            renderImagePreview(file);
+            showToast('Image added', 'success');
+          }
+        });
+      }
+
+      window.handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      };
+
+      async function sendMessage() {
+        if (isWaitingForResponse) return;
+        const text = userInput.value.trim();
+        if (!text && !selectedImageFile) return;
+        
+        const apiKey = localStorage.getItem('umair_api_key') || apiKeyInput.value.trim();
+        const model = localStorage.getItem('umair_model') || modelNameInput.value.trim();
+        
+        if (!apiKey || !model) {
+          showToast('Please set API Key & Model in Settings', 'error');
+          openSettingsFlow();
+          return;
+        }
+
+        const userMessage = {
+          role: 'user',
+          content: text || "Analyze this image",
+          image: imagePreviewUrl || null
+        };
+        
+        currentChat.push(userMessage);
+        renderMessages();
+        userInput.value = '';
+        clearImagePreview();
+        updateSessionMessages();
+        
+        isWaitingForResponse = true;
+        sendBtn.disabled = true;
+        addThinkingIndicator();
+
+        try {
+          const messagesForAPI = [];
+          // Build conversation context (last 10 messages)
+          const recent = currentChat.slice(-10);
+          recent.forEach(msg => {
+            if (msg.role === 'user') {
+              const parts = [];
+              if (msg.image) {
+                parts.push({
+                  type: "image_url",
+                  image_url: { url: msg.image }
+                });
+              }
+              if (msg.content) {
+                parts.push({ type: "text", text: msg.content });
+              }
+              messagesForAPI.push({ role: "user", content: parts });
+            } else {
+              messagesForAPI.push({ role: "assistant", content: msg.content });
+            }
+          });
+
+          const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: messagesForAPI,
+              max_tokens: 1000,
+            })
+          });
+
+          removeThinkingIndicator();
+          
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error?.message || 'API error');
+          }
+          
+          const data = await response.json();
+          const aiContent = data.choices?.[0]?.message?.content || "No response";
+          
+          currentChat.push({ role: 'assistant', content: aiContent });
+          renderMessages();
+          updateSessionMessages();
+        } catch (error) {
+          removeThinkingIndicator();
+          showToast(`Error: ${error.message}`, 'error');
+          currentChat.push({ role: 'assistant', content: `⚠️ ${error.message}` });
+          renderMessages();
+          updateSessionMessages();
+        } finally {
+          isWaitingForResponse = false;
+          sendBtn.disabled = false;
+        }
+      }
+
+      function addThinkingIndicator() {
+        const div = document.createElement('div');
+        div.id = 'thinkingIndicator';
+        div.className = 'flex justify-start';
+        div.innerHTML = `<div class="bg-gray-800/80 px-5 py-3 rounded-2xl animate-thinking text-cyan-300"><i class="fas fa-spinner fa-pulse mr-2"></i> Thinking...</div>`;
+        chatMessages.appendChild(div);
+        scrollToBottom();
+      }
+
+      function removeThinkingIndicator() {
+        const el = document.getElementById('thinkingIndicator');
+        if (el) el.remove();
+      }
+
+      window.copyMessage = (text) => {
+        navigator.clipboard.writeText(text).then(() => showToast('Copied!', 'success'));
+      };
+
+      // ----- SETTINGS & PASSWORD -----
+      window.settingsIconBtn.onclick = () => {
+        document.getElementById('passwordModal').classList.remove('hidden');
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('passwordError').classList.add('hidden');
+      };
+
+      window.closePasswordModal = () => passwordModal.classList.add('hidden');
+      
+      window.verifyPassword = () => {
+        const input = document.getElementById('passwordInput').value;
+        if (input === PASSWORD) {
+          passwordModal.classList.add('hidden');
+          openSettingsPanel();
+        } else {
+          const err = document.getElementById('passwordError');
+          err.classList.remove('hidden');
+          err.classList.add('error-shake');
+          setTimeout(() => err.classList.remove('error-shake'), 500);
+        }
+      };
+
+      function openSettingsFlow() {
+        passwordModal.classList.remove('hidden');
+      }
+
+      function openSettingsPanel() {
+        settingsPanel.classList.remove('hidden');
+        apiKeyInput.value = localStorage.getItem('umair_api_key') || '';
+        modelNameInput.value = localStorage.getItem('umair_model') || '';
+      }
+
+      window.closeSettingsPanel = () => settingsPanel.classList.add('hidden');
+
+      window.saveSettings = () => {
+        const key = apiKeyInput.value.trim();
+        const model = modelNameInput.value.trim();
+        localStorage.setItem('umair_api_key', key);
+        localStorage.setItem('umair_model', model);
+        showToast('Settings saved successfully', 'success');
+        closeSettingsPanel();
+      };
+
+      function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-slide px-5 py-3 rounded-xl text-white flex items-center gap-2 ${
+          type==='error' ? 'bg-red-600/90' : 'bg-green-600/90'
+        }`;
+        toast.innerHTML = `<i class="fas ${type==='error'?'fa-exclamation-circle':'fa-check-circle'}"></i> ${message}`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      function escapeHtml(text) {
+        return String(text).replace(/[&<>"]/g, function(m) {
+          if (m === '&') return '&amp;';
+          if (m === '<') return '&lt;';
+          if (m === '>') return '&gt;';
+          if (m === '"') return '&quot;';
+          return m;
+        });
+      }
+
+      function escapeAttr(text) {
+        return String(text).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      }
+
+      function renderMarkdown(text) {
+        if (typeof marked !== 'undefined') {
+          return marked.parse(text, { breaks: true });
+        }
+        return escapeHtml(text);
+      }
+
+      window.sendMessage = sendMessage;
+      window.toggleSidebar = () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      };
+      
+      // Expose for inline handlers
+      window.clearImagePreview = clearImagePreview;
+    })();
+  </script>
+  <style>
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.3); border-radius: 10px; }
+  </style>
 </body>
 </html>
